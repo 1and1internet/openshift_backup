@@ -206,7 +206,7 @@ class PodBackup
     logfile = "#{backup_path}/#{container['name']}.log"
     cmdfile = "#{backup_path}/#{container['name']}.cmd"
 
-    backup_cmd = "oc exec -n #{@project} #{@podname} -c #{container['name']} 2> \"#{logfile}\" -- "
+    backup_cmd = "set -o pipefail && oc exec -n #{@project} #{@podname} -c #{container['name']} 2> \"#{logfile}\" -- "
     backup_cmd << "bash -c \"#{mysqldump_cmd}\" | gzip > \"#{sqlfile}\""
     @log.debug "Running: #{backup_cmd}"
 
