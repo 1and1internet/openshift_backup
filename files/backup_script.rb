@@ -272,7 +272,7 @@ def oc_login(silent=false)
     @global_logger.info "Logging into openshift with serviceaccount" unless silent
     ret = system('oc login https://openshift-cluster.fhpaas.fasthosts.co.uk:8443 --token=$(cat /var/run/secrets/kubernetes.io/serviceaccount/token) > /dev/null 2>&1')
   end
-  ret = system('oc status >/dev/null 2>&1')
+  ret = system('oc project default >/dev/null 2>&1')
   die "Unable to log into openshift" unless ret
 end
 
