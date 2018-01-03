@@ -34,6 +34,12 @@ else
   FAKESYSTEM=false
 end
 
+if ENV.include? 'ALL_NAMESPACES' then
+  ALL_NAMESPACES=ENV['ALL_NAMESPACES']
+else
+  ALL_NAMESPACES=false
+end
+
 BACKUP_DEST_ROOT='/backup-data'
 
 def die (msg)
@@ -262,7 +268,16 @@ end
 @yaml_loaded = false
 
 def load_pod_yaml
-  ret = YAML.load(`oc get pods --all-namespaces  -l needs_backup="yes" -o yaml`)
+  if ALL_NAMESPACES then
+    ret = YAML.load(`oc get pods --all-namespaces -l needs_backup="yes" -o yaml`)
+  else
+    projects = YAML.load(`oc get projects -o yaml`)
+    ret = {'items' => []}
+    projects['items'].each do |project|
+      podlist = YAML.load(`oc get pods -n #{project['metadata']['name']} -l needs_backup="yes" -o yaml 2>/dev/null`)
+      ret['items'] += podlist['items']
+    end
+  end
   @yaml_loaded = true
   return ret
 end
@@ -270,7 +285,7 @@ end
 def oc_login(silent=false)
   if File.exists? '/var/run/secrets/kubernetes.io/serviceaccount/token' then
     @global_logger.info "Logging into openshift with serviceaccount" unless silent
-    ret = system('oc login https://openshift-cluster.fhpaas.fasthosts.co.uk:8443 --token=$(cat /var/run/secrets/kubernetes.io/serviceaccount/token) > /dev/null 2>&1')
+    ret = system('oc login https://openshift.default.svc.cluster.local --token=$(cat /var/run/secrets/kubernetes.io/serviceaccount/token) > /dev/null 2>&1')
   end
   ret = system('oc project default >/dev/null 2>&1')
   die "Unable to log into openshift" unless ret
