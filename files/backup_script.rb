@@ -293,7 +293,8 @@ def oc_login(silent=false)
     @global_logger.info "Logging into openshift with serviceaccount" unless silent
     ret = system("oc login #{OPENSHIFT_API_URL} --token=$(cat /var/run/secrets/kubernetes.io/serviceaccount/token) > /dev/null 2>&1")
   end
-  ret = system('oc project >/dev/null 2>&1')
+  # Select a project (any project we have access to) so oc creates a valid config file in ~/.kube
+  ret = system('oc projects -q | head -n 1 | xargs oc project >/dev/null 2>&1')
   die "Unable to log into openshift" unless ret
 end
 
