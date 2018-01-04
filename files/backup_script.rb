@@ -40,6 +40,12 @@ else
   ALL_NAMESPACES=false
 end
 
+if ENV.include? 'OPENSHIFT_API_URL' then
+  OPENSHIFT_API_URL=ENV['OPENSHIFT_API_URL']
+else
+  OPENSHIFT_API_URL='https://openshift.default.svc.cluster.local'
+end
+
 BACKUP_DEST_ROOT='/backup-data'
 
 def die (msg)
@@ -285,9 +291,9 @@ end
 def oc_login(silent=false)
   if File.exists? '/var/run/secrets/kubernetes.io/serviceaccount/token' then
     @global_logger.info "Logging into openshift with serviceaccount" unless silent
-    ret = system('oc login https://openshift.default.svc.cluster.local --token=$(cat /var/run/secrets/kubernetes.io/serviceaccount/token) > /dev/null 2>&1')
+    ret = system("oc login #{OPENSHIFT_API_URL} --token=$(cat /var/run/secrets/kubernetes.io/serviceaccount/token) > /dev/null 2>&1")
   end
-  ret = system('oc project default >/dev/null 2>&1')
+  ret = system('oc project >/dev/null 2>&1')
   die "Unable to log into openshift" unless ret
 end
 
