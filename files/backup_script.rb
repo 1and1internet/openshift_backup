@@ -207,9 +207,14 @@ class PodBackup
   def backup_mysql (container)
     backup_path = "#{container_backup_dir container['name']}"
 
-    metapw = container['env'].select { |env| env['name'] == 'MYSQL_ROOT_PASSWORD' }
     root_pw = ''
-    root_pw = metapw[0]['name'] if defined? metapw[0]['name']
+    # Check if we can connect without a password first
+    test_access_cmd = "oc exec -n #{@project} #{@podname} -c #{container['name']} >/dev/null 2>&1 -- bash -c \"mysql -u root -e ''\""
+    access_allowed = system_wrapper(test_access_cmd)
+    unless access_allowed
+      metapw = container['env'].select { |env| env['name'] == 'MYSQL_ROOT_PASSWORD' }
+      root_pw = metapw[0]['name'] if defined? metapw[0]['name']
+    end
 
     mysqldump_cmd = "mysqldump -u root --all-databases"
     mysqldump_cmd += " -p\\\$#{root_pw}" unless root_pw.empty?
