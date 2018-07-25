@@ -92,7 +92,7 @@ class BackupCleaner:
                     self.counters['deleted']['directories'] += 1
 
             if path.isfile(file_path):
-                file_age = datetime.datetime.now() - datetime.datetime.fromtimestamp(path.getctime(file_path))
+                file_age = datetime.datetime.now() - datetime.datetime.fromtimestamp(path.getmtime(file_path))
                 file_age.total_seconds()
 
                 if file_age.total_seconds() > self.expiry_in_seconds:
