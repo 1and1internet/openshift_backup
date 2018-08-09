@@ -5,17 +5,21 @@ from os import path
 import sys
 import datetime
 
+
+defaultExpiryInDays = os.environ.get('BACKUP_CLEANER_EXPIRY_IN_DAYS', 30)
+defaultDirectoryPath = os.environ.get('BACKUP_CLEANER_DIRECTORY_PATH')
+
 parser = argparse.ArgumentParser(description='Script used for cleaning backup files if they expired')
 parser.add_argument(
     '-d', '--directory',
     help='base directory path to clean',
-    required=True
+    default=defaultDirectoryPath
 )
 parser.add_argument(
     '-e', '--expiry',
     help='Expiry time in days',
     type=int,
-    default=30
+    default=defaultExpiryInDays
 )
 parser.add_argument(
     '-r', '--recursive',
@@ -63,6 +67,9 @@ class BackupCleaner:
     }
 
     def __init__(self, directory, expiry_in_days, recursive, delete_empty_dirs, verbose):
+
+        if not directory:
+            raise AttributeError("Directory parameter cannot be empty")
         if not path.isdir(directory):
             raise AttributeError("Cannot find directory: {0}".format(directory))
         self.directory = directory
@@ -133,6 +140,8 @@ class BackupCleaner:
 
     def run(self):
         self.log('clean up started')
+        self.log('directory:      ' + self.directory)
+        self.log('expiry in days: ' + (str) (self.expiry_in_seconds / 86400))
         self.__delete_expired(self.directory)
         self.log('clean up finished')
         self.summary()
@@ -143,9 +152,6 @@ class BackupCleaner:
 
 
 if __name__ == '__main__':
-    if len(sys.argv) == 1:
-        parser.print_help()
-        exit(1)
     args = parser.parse_args()
     cleaner = BackupCleaner(args.directory, args.expiry, args.recursive, not args.leave_empty_dirs, args.v)
     cleaner.run()
