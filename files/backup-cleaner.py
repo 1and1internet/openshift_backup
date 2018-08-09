@@ -6,7 +6,7 @@ import sys
 import datetime
 
 
-defaultExpiryInDays = os.environ.get('BACKUP_CLEANER_EXPIRY_IN_DAYS') or 30
+defaultExpiryInDays = os.environ.get('BACKUP_CLEANER_EXPIRY_IN_DAYS', 30)
 defaultDirectoryPath = os.environ.get('BACKUP_CLEANER_DIRECTORY_PATH')
 
 parser = argparse.ArgumentParser(description='Script used for cleaning backup files if they expired')
