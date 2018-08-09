@@ -1,5 +1,5 @@
 FROM alpine:3.7
-MAINTAINER james.eckersall@1and1.co.uk
+LABEL maintainer="DevelopmentTeamSerenity@fasthosts.com"
 
 
 ENV BACKUP_CLEANER_EXPIRY_IN_DAYS 10
