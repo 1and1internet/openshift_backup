@@ -14,6 +14,6 @@ RUN mkdir -p /etc/periodic/15min /etc/periodic/hourly /etc/periodic/daily /etc/p
 RUN chmod +x /etc/periodic/15min/* /etc/periodic/hourly/* /etc/periodic/daily/* /etc/periodic/weekly/* /etc/periodic/monthly/* 2>/dev/null || true
 
 RUN chmod +x /backup-cleaner.py
-RUN echo "0	0	*	*	*	/backup-cleaner.py -e 60 -d /backup-data -r 1 -v" >> /etc/crontabs/root
+RUN echo "0	0	*	*	*	/backup-cleaner.py -e 10 -d /backup-data -r 1 -v" >> /etc/crontabs/root
 
 ENTRYPOINT ["supervisord", "--nodaemon", "--configuration", "/etc/supervisord.conf"]
