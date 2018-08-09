@@ -1,6 +1,10 @@
 FROM alpine:3.7
 MAINTAINER james.eckersall@1and1.co.uk
 
+
+ENV BACKUP_CLEANER_EXPIRY_IN_DAYS 10
+ENV BACKUP_CLEANER_DIRECTORY_PATH /backup-data
+
 RUN \
   apk update && \
   apk add ruby bash curl tar supervisor && \
@@ -14,9 +18,5 @@ COPY files /
 RUN \
   mkdir -p /etc/periodic/15min /etc/periodic/hourly /etc/periodic/daily /etc/periodic/weekly /etc/periodic/monthly && \
   chmod +x /etc/periodic/15min/* /etc/periodic/hourly/* /etc/periodic/daily/* /etc/periodic/weekly/* /etc/periodic/monthly/* 2>/dev/null || true
-
-RUN \
-  chmod +x /backup-cleaner.py && \
-  echo "0	0	*	*	*	/backup-cleaner.py -e 60 -d /backup-data -r 1 -v" >> /etc/crontabs/root
 
 ENTRYPOINT ["supervisord", "--nodaemon", "--configuration", "/etc/supervisord.conf"]
