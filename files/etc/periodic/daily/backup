@@ -1,5 +1,8 @@
 #!/bin/bash
+set -e
 
-python /backup-cleaner.py -r 1 -v
-
+# Make backups
 ruby /backup_script.rb run
+
+# Clean up old backups
+python /backup-cleaner.py -r 1 -v
