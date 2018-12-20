@@ -97,11 +97,6 @@ class PodBackup
     "#{root}/#{container_name}"
   end
 
-  # this assumes that "root" maps to <project>/<dc> on gluster
-  def etcd_local_backup_dir (container_name, root=@local_backup_dest)
-    "#{root}/#{@backup_time}/#{@podname}/#{container_name}"
-  end
-
   def create_backup_dir (container_name)
     @log.debug "mkdir_p and chown_R on #{container_backup_dir(container_name)}"
     FileUtils.mkdir_p container_backup_dir(container_name), :mode => 0700
@@ -189,12 +184,17 @@ class PodBackup
   # local backup dir needs to map to gluster share /storage/infra01/infra-backups/<project>/<dc>
 
     backup_path = container_backup_dir container['name']
+    etcd_backup_file = "#{backup_path}/#{container['name']}.tar.gz"
     logfile = "#{backup_path}/#{container['name']}.log"
     cmdfile = "#{backup_path}/#{container['name']}.cmd"
-    backup_cmd = "oc exec -n #{@project} #{@podname} -c #{container['name']} > \"#{logfile}\" 2>&1 -- "
-    backup_cmd << "/etcd/etcdctl backup"
-    backup_cmd << " --data-dir=\"#{@backup_src[0]}\""
-    backup_cmd << " --backup-dir=\"#{etcd_local_backup_dir container['name']}\""
+
+    etcd_backup_cmd = "rm -rf /tmp/backup.etcd && "
+    etcd_backup_cmd << "/etcd/etcdctl backup --data-dir='#{@backup_src[0]}' --backup-dir=/tmp/backup.etcd && "
+    etcd_backup_cmd << "tar cfz /tmp/etcd-backup.tar.gz -C /tmp/backup.etcd . && "
+    etcd_backup_cmd << "cat /tmp/etcd-backup.tar.gz"
+    
+    backup_cmd = "set -o pipefail && oc exec -n #{@project} #{@podname} -c #{container['name']} > \"#{logfile}\" 2>&1 -- "
+    backup_cmd << "bash -c \"#{etcd_backup_cmd}\" > \"#{etcd_backup_file}\""
 
     @log.debug "Running: #{backup_cmd}"
 
