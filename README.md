@@ -1,3 +1,5 @@
+# Openshift Pod Backup
+
 This repo describes a docker image that will back up openshift pods.
 
 The docker image is based on Alpine and has the openshift origin cli baked in.
@@ -26,3 +28,7 @@ To rebuild the docker image:
 
 docker login docker-registry.fhpaas.fasthosts.co.uk:443
 ./build_and_push.sh
+
+## Cleanup
+
+backups older than 30 days (default) are automatically deleted. This schedule runs on a daily basis. see `files/etc/periodic/daily/backup`
