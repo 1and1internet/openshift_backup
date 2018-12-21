@@ -9,5 +9,5 @@ python /backup-cleaner.py -r 1 -v
 
 # Move backups off cluster
 if [ "${OFF_CLUSTER_BACKUPS_ENABLED}" == 'true' ]; then
-  ./off-cluster-backup.sh
+  /off-cluster-backup.sh
 fi

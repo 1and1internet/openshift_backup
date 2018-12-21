@@ -25,14 +25,17 @@ export PASSPHRASE=$OFF_CLUSTER_BACKUP_PASSWORD
 
 if [ "$1" == "status" ]; then
   echo "Verifying backups on $TARGET_DIRECTORY ....."
-  duplicity verify --progress "$TARGET_DIRECTORY" "$SOURCE_DIRECTORY"
+  duplicity verify --allow-source-mismatch "$TARGET_DIRECTORY" "$SOURCE_DIRECTORY"
   exit 0
 fi
 
 # Backup to nfs mount
 echo "Starting backup from $SOURCE_DIRECTORY to $TARGET_DIRECTORY"
-duplicity --progress --name="$BACKUP_NAME" "$SOURCE_DIRECTORY" "$TARGET_DIRECTORY"
+duplicity --allow-source-mismatch \
+          --name="$BACKUP_NAME" \
+          --log-file /var/log/duplicity.log \
+          "$SOURCE_DIRECTORY" "$TARGET_DIRECTORY"
 
 # Deleting old backups
 echo "Removing Old backups on $TARGET_DIRECTORY"
-duplicity --progress remove-older-than "$BACKUP_RETENTION" --force "$TARGET_DIRECTORY"
+duplicity --allow-source-mismatch remove-older-than "$BACKUP_RETENTION" --force "$TARGET_DIRECTORY"
