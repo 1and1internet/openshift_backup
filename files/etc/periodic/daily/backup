@@ -14,7 +14,7 @@ log "Clearing old backups /backup-cleaner.py"
 python /backup-cleaner.py -r 1 -v
 
 # Move backups off cluster
-if [ "${OFF_CLUSTER_BACKUPS_ENABLED}" == 'true' ]; then
+if [ ${OFF_CLUSTER_BACKUPS_ENABLED} ]; then
   log "Moving backups off cluster /off-cluster-backup.sh"
   /off-cluster-backup.sh
 fi
