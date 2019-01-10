@@ -86,12 +86,12 @@ Last full backup date: Thu Dec 20 12:49:51 2018
 
 ### Delete old backups
 
-The backup sript will automatically delete backups older than the `OFF_CLUSTER_BACKUP_RETENTION` variable.
+The backup sript will automatically delete full backups if there are more of them than the `OFF_CLUSTER_BACKUP_NUMBER_OF_FULL_BACKUPS_TO_KEEP` variable.
 
 You can manually do this by running
 
 ```bash
-duplicity --allow-source-mismatch remove-older-than "1D" --force "$OFF_CLUSTER_BACKUP_TARGET_DIRECTORY"
+duplicity remove-all-but-n-full $OFF_CLUSTER_BACKUP_NUMBER_OF_FULL_BACKUPS_TO_KEEP --allow-source-mismatch --force "$OFF_CLUSTER_BACKUP_TARGET_DIRECTORY"
 ```
 
 ### Backup collection status

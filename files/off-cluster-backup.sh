@@ -5,8 +5,8 @@
 
 set -e
 
-SOURCE_DIRECTORY=${OFF_CLUSTER_BACKUP_SOURCE_DIRECTORY:-"/home/leroy/Development/github.com/1and1internet/openshift_backup/backup-data"}
-TARGET_DIRECTORY=${OFF_CLUSTER_BACKUP_TARGET_DIRECTORY:-"file:///home/leroy/Development/github.com/1and1internet/openshift_backup/nfs-storage/backups"}
+SOURCE_DIRECTORY=${OFF_CLUSTER_BACKUP_SOURCE_DIRECTORY:-"/backup-data"}
+TARGET_DIRECTORY=${OFF_CLUSTER_BACKUP_TARGET_DIRECTORY:-"file:///nfs-storage/backups"}
 BACKUP_NAME=${OFF_CLUSTER_BACKUP_NAME:-"towp-backup"}
 NUMBER_OF_FULL_BACKUPS_TO_KEEP=${OFF_CLUSTER_BACKUP_NUMBER_OF_FULL_BACKUPS_TO_KEEP:-"7"}
 
@@ -43,7 +43,7 @@ duplicity full \
 
 # Deleting old backups
 echo "Removing Old backups on $TARGET_DIRECTORY"
-duplicity remove-all-but-n-full \
-          --allow-source-mismatch "$NUMBER_OF_FULL_BACKUPS_TO_KEEP" \
+duplicity remove-all-but-n-full "$NUMBER_OF_FULL_BACKUPS_TO_KEEP" \
+          --allow-source-mismatch \
           --force \
           "$TARGET_DIRECTORY"
