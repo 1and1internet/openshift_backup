@@ -7,7 +7,7 @@ ENV BACKUP_CLEANER_DIRECTORY_PATH /backup-data
 
 RUN \
   apk update && \
-  apk add ruby bash curl tar supervisor py-pip rsync duplicity && \
+  apk add ruby ruby-json bash curl tar supervisor py-pip rsync duplicity && \
   apk del build-base && \
   pip install fasteners && \
   rm -rf /var/cache/apk/*  && \

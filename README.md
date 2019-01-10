@@ -43,7 +43,7 @@ OFF_CLUSTER_BACKUP_PASSWORD="insecure"
 OFF_CLUSTER_BACKUP_SOURCE_DIRECTORY="/backup-data"
 OFF_CLUSTER_BACKUP_TARGET_DIRECTORY="file:///nfs-storage/backups"
 OFF_CLUSTER_BACKUP_NAME="my-backup"
-OFF_CLUSTER_BACKUP_RETENTION="10D"
+OFF_CLUSTER_BACKUP_NUMBER_OF_FULL_BACKUPS_TO_KEEP="7"
 ```
 
 ### Manual backups
@@ -75,10 +75,10 @@ duplicity restore --allow-source-mismatch \
 
 ### Verify backups
 
-To verify the backup entegrity you can run the backup command with the status arg eg.
+To verify the backup entegrity you can run the backup command with the verify arg eg.
 
 ```bash
-./off-cluster-backup.sh status
+./off-cluster-backup.sh verify
 Verifying backups on file:///nfs-storage/backups .....
 Local and Remote metadata are synchronized, no sync needed.
 Last full backup date: Thu Dec 20 12:49:51 2018
@@ -92,4 +92,41 @@ You can manually do this by running
 
 ```bash
 duplicity --allow-source-mismatch remove-older-than "1D" --force "$OFF_CLUSTER_BACKUP_TARGET_DIRECTORY"
+```
+
+### Backup collection status
+
+The collection status of a backup can be found by running the off cluster command with the `collection-status` argument
+
+```bash
+/off-cluster-backup.sh collection-status
+Getting collection status for backups on file:///nfs-storage/backups .....
+Local and Remote metadata are synchronized, no sync needed.
+Last full backup date: Thu Jan 10 09:49:20 2019
+Collection Status
+-----------------
+Connecting with backend: BackendWrapper
+Archive dir: /root/.cache/duplicity/fc682b7c8a64a29bcd24c8e05a9bba21
+
+Found 1 secondary backup chain.
+Secondary chain 1 of 1:
+-------------------------
+Chain start time: Wed Jan  9 12:27:39 2019
+Chain end time: Thu Jan 10 02:16:28 2019
+Number of contained backup sets: 1
+Total number of contained volumes: 101
+ Type of backup set:                            Time:      Num volumes:
+                Full         Wed Jan  9 12:27:39 2019                101
+-------------------------
+
+Found primary backup chain with matching signature chain:
+-------------------------
+Chain start time: Thu Jan 10 09:49:20 2019
+Chain end time: Thu Jan 10 09:49:20 2019
+Number of contained backup sets: 1
+Total number of contained volumes: 101
+ Type of backup set:                            Time:      Num volumes:
+                Full         Thu Jan 10 09:49:20 2019               101
+-------------------------
+No orphaned or incomplete backup sets found.
 ```
