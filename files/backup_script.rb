@@ -8,6 +8,7 @@ require 'logger'
 # metadata.labels.needs_backup: yes
 # metadata.labels.backup_type: mysql|rsync|etcd|mongodb
 # metadata.annotations.backup_src: /path/to/files/for/rsync (ignored for other backup types)
+# metadata.annotations.backup_ignore_files_changed_warning: true|false (default false, only for rsync backup type)
 
 # uses: pod.container.securityContext.runAsUser
 
@@ -69,6 +70,11 @@ class PodBackup
 
     @backup_type = @metadata['labels']['backup_type']
     @backup_src = @metadata['annotations']['backup_src'].split(':') if @metadata['annotations'].key? 'backup_src'
+    if @metadata['annotations'].key? 'backup_ignore_files_changed_warning' then
+      @backup_ignore_files_changed_warning = @metadata['annotations']['backup_ignore_files_changed_warning'] == 'true'
+    else
+      @backup_ignore_files_changed_warning = false
+    end
     @local_backup_dest = @metadata['annotations']['backup_dest'] if @backup_type == 'etcd'
     @runasuser = @pod_spec['spec']['securityContext']['runAsUser'] if @pod_spec['spec']['securityContext'].key? 'runAsUser'
 
@@ -247,7 +253,12 @@ class PodBackup
     cmdfile = "#{backup_path}/#{container['name']}.cmd"
 
     backup_cmd = "oc exec -n #{@project} #{@podname} -c #{container['name']} -- "
-    backup_cmd << "bash -c \"tar czf - #{source_paths}\" 2> \"#{logfile}\" 1> \"#{tarfile}\""
+    if @backup_ignore_files_changed_warning then
+      # tar exits with code 1 for files changed.  Ignore 1 but return any other exit code
+      backup_cmd << "bash -c \"tar czf - #{source_paths} || ( ret=\\\$?; [[ \\\$ret -eq 1 ]] || exit \\\$ret )\" 2> \"#{logfile}\" 1> \"#{tarfile}\""
+    else
+      backup_cmd << "bash -c \"tar czf - #{source_paths}\" 2> \"#{logfile}\" 1> \"#{tarfile}\""
+    end
     @log.debug "Running: #{backup_cmd}"
 
     File.open(cmdfile, 'w') { |f| File.write f, "#{backup_cmd}\n" }
